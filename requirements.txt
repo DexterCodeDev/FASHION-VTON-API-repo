@@ -1,7 +1,10 @@
 fastapi==0.111.0
-uvicorn==0.30.1
+uvicorn[standard]==0.30.1
 python-multipart==0.0.9
 Pillow==10.3.0
 huggingface-hub==0.23.4
-# Installs the official Fashn VTON 1.5 pipeline directly from GitHub
+torch==2.3.0
+torchvision==0.18.0
+transformers
+accelerate
 git+https://github.com/fashn-AI/fashn-vton-1.5.git
