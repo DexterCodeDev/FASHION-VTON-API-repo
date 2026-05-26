@@ -1,7 +1,10 @@
 .git
 .gitignore
-__pycache__
+
+__pycache__/
 *.pyc
-venv
-.venv
-weights
+
+venv/
+.venv/
+
+outputs/
