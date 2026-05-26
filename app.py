@@ -23,7 +23,7 @@ def load_model():
     print(f"Loading pipeline on {device}...")
     
     # Initialize with token for potential gated access
-    pipeline = TryOnPipeline(weights_dir=weights_dir, token=hf_token)
+    pipeline = TryOnPipeline(weights_dir=weights_dir)
     pipeline.to(device)
     print("Pipeline ready.")
 
