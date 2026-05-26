@@ -1,17 +1,13 @@
-# Python
 __pycache__/
 *.pyc
 *.pyo
-.venv/
+*.pyd
+
+.env
 venv/
-env/
+.venv/
 
-# Data/Weights (We download these inside the Docker build)
 weights/
-*.pth
-*.safetensors
+hf_cache/
 
-# OS
-.DS_Store
-.vscode/
-.idea/
+outputs/
