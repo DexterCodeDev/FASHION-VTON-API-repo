@@ -1,24 +1,38 @@
-# Use official PyTorch image with CUDA 12.1
-FROM pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+ENV HF_HOME=/app/hf_cache
 
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
+    python3 \
+    python3-pip \
     git \
+    ffmpeg \
+    libgl1 \
+    libglib2.0-0 \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+RUN python3 -m pip install --upgrade pip
+
+# Clone VTON repo automatically
+RUN git clone https://github.com/fashn-AI/fashn-vton-1.5.git
+
+# Install VTON package
+RUN pip install -e ./fashn-vton-1.5
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-# Pre-download weights into the image
-# This assumes HF_TOKEN is available as a build-arg or cached
-RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='fashn-ai/fashn-vton-1.5', local_dir='./weights')"
+COPY app.py .
+COPY start.sh .
 
-COPY . .
+RUN chmod +x start.sh
 
 EXPOSE 8080
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["bash", "start.sh"]
