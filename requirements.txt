@@ -1,10 +1,4 @@
-fastapi==0.111.0
-uvicorn[standard]==0.30.1
-python-multipart==0.0.9
-Pillow==10.3.0
-huggingface-hub==0.23.4
-torch==2.3.0
-torchvision==0.18.0
-transformers
-accelerate
-git+https://github.com/fashn-AI/fashn-vton-1.5.git
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+python-multipart==0.0.20
+pillow>=9.0.0
