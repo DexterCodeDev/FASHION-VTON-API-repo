@@ -13,16 +13,10 @@ pipeline = None
 @app.on_event("startup")
 def load_model():
     global pipeline
-    # The Docker build will have placed weights here
     weights_dir = "./weights"
-    
-    # HF_TOKEN is injected via your Cloud Run Secret Manager/Environment Variable
-    hf_token = os.getenv("HF_TOKEN")
-    
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Loading pipeline on {device}...")
     
-    # Initialize with token for potential gated access
     pipeline = TryOnPipeline(weights_dir=weights_dir)
     pipeline.to(device)
     print("Pipeline ready.")
@@ -38,19 +32,27 @@ async def try_on(
         person_pil = Image.open(await person_image.read()).convert("RGB")
         garment_pil = Image.open(await garment_image.read()).convert("RGB")
         
-        result = pipeline(
-            person_image=person_pil,
-            garment_image=garment_pil,
-            category=category,
-            garment_photo_type=garment_photo_type,
-            num_timesteps=30,
-            guidance_scale=1.5,
-            segmentation_free=True
-        )
+        # 1. Disable gradient calculation to save massive amounts of VRAM
+        with torch.inference_mode(): 
+            result = pipeline(
+                person_image=person_pil,
+                garment_image=garment_pil,
+                category=category,
+                garment_photo_type=garment_photo_type,
+                num_timesteps=30,
+                guidance_scale=1.5,
+                segmentation_free=True
+            )
         
         buf = BytesIO()
         result.images[0].save(buf, format="PNG")
         buf.seek(0)
         return StreamingResponse(buf, media_type="image/png")
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+        
+    finally:
+        # 2. Aggressively clear the GPU cache after every request
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
